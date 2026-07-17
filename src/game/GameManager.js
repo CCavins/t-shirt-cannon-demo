@@ -29,6 +29,11 @@ export class GameManager {
     this._finishGrace = 0;
     this._viewGrace = 0;
     this.trackingOrientation = false;
+    this._camLocal = new THREE.Vector3();
+    this._worldPos = new THREE.Vector3();
+    this._toCannon = new THREE.Vector3();
+    this._fwd = new THREE.Vector3();
+    this._ndc = new THREE.Vector3();
   }
 
   placeCannon(worldPos) {
@@ -138,17 +143,35 @@ export class GameManager {
         this._outOfViewT = 0;
         this.needsRecenterOffer = false;
       }
+    } else if (!this.running) {
+      this.needsRecenterOffer = false;
+      this._outOfViewT = 0;
     }
   }
 
+  /**
+   * True when the cannon is roughly in front of the phone and on-screen.
+   * Uses camera-space depth (Three looks down -Z) + angle + NDC xy —
+   * NOT NDC z>0, which false-triggers for mid-field objects in Three.js.
+   */
   _isCannonVisible() {
     this.camera.updateMatrixWorld(true);
     this.cannon.group.updateMatrixWorld(true);
-    const world = new THREE.Vector3();
-    this.cannon.group.getWorldPosition(world);
-    const v = world.project(this.camera);
-    // Generous frustum check — cannon sits lower-center by design
-    return v.z > 0 && v.z < 1 && Math.abs(v.x) < 1.4 && Math.abs(v.y) < 1.5;
+    this.cannon.group.getWorldPosition(this._worldPos);
+
+    // Camera-local: in front means negative Z
+    this._camLocal.copy(this._worldPos).applyMatrix4(this.camera.matrixWorldInverse);
+    if (this._camLocal.z > -0.4) return false;
+
+    // Angle from camera forward to cannon
+    this.camera.getWorldDirection(this._fwd);
+    this._toCannon.copy(this._worldPos).sub(this.camera.position).normalize();
+    const angleDeg = THREE.MathUtils.radToDeg(Math.acos(THREE.MathUtils.clamp(this._fwd.dot(this._toCannon), -1, 1)));
+    if (angleDeg < 50) return true;
+
+    // Fallback: NDC x/y only (ignore NDC z — unreliable for this check)
+    this._ndc.copy(this._worldPos).project(this.camera);
+    return Math.abs(this._ndc.x) < 1.25 && Math.abs(this._ndc.y) < 1.35;
   }
 
   hitProjectile(projectile, screenX, screenY) {

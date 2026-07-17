@@ -381,13 +381,12 @@ export class AppController {
       this.particles?.update(dt);
     }
 
-    if (
-      this.game &&
-      this.state.is(STATES.PLAYING) &&
-      this.game.needsRecenterOffer &&
-      !this._suppressRecenterOffer
-    ) {
-      this.ui.showRecenterOffer(true);
+    if (this.game && this.state.is(STATES.PLAYING)) {
+      const showOffer =
+        this.game.needsRecenterOffer && !this._suppressRecenterOffer;
+      this.ui.showRecenterOffer(showOffer);
+    } else if (!this.state.is(STATES.PLAYING)) {
+      this.ui.showRecenterOffer(false);
     }
 
     this._updateDebug();
