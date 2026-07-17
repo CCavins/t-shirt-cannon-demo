@@ -62,8 +62,8 @@ export const CONFIG = {
   },
 
   cannon: {
-    /** Virtual meters in front of the placement pose */
-    distance: 3.0,
+    /** Virtual meters in front of the placement pose (~75% farther than the original 3m) */
+    distance: 5.25,
     /** Meters below the initial viewing direction (keep modest so it stays on-screen) */
     heightOffset: 0.65,
     appearDuration: 0.55,
