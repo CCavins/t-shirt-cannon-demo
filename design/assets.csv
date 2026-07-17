@@ -1,0 +1,12 @@
+id,role,type,description,size/ratio,style line ref,source
+cannon-mesh,world/cannon,procedural-3d,Chunky arcade T-shirt cannon built from primitives,hero 1.0,STYLE FORMULA,generate
+shirt-projectile,world/projectile,procedural-3d,Rolled coral T-shirt capsule bundle,0.35,STYLE FORMULA,generate
+muzzle-flash,fx/muzzle,procedural-3d,Yellow additive flash disc at barrel,0.2,STYLE FORMULA,generate
+hit-particles,fx/particles,procedural-3d,Confetti planes cyan yellow coral white,0.1,STYLE FORMULA,generate
+placement-guide,ui/placement,css,Translucent dashed cannon placement guide,1:1,STYLE FORMULA,generate
+game-logo,ui/logo,text,SHIRT BLAST AR display title,wordmark,STYLE FORMULA,generate
+hud-panels,ui/hud,css,Glass navy score timer combo chips,responsive,STYLE FORMULA,generate
+sfx-pack,audio/sfx,procedural-audio,Countdown launch hit miss buzzer results,n/a,n/a,generate
+cannon-ref,reference/cannon,image,Higgsfield concept for future GLB,1:1,STYLE FORMULA,reference_media
+shirt-ref,reference/shirt,image,Higgsfield rolled shirt concept,1:1,STYLE FORMULA,reference_media
+ui-ref,reference/ui,image,Higgsfield mobile HUD concept,9:16,STYLE FORMULA,reference_media
