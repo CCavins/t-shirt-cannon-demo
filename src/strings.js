@@ -17,9 +17,9 @@ export const STR = {
   motionDeniedHint:
     'Motion access was denied — the game still works, but the cannon won’t move with your phone. Enable Motion & Orientation Access in Settings → Safari → (or site settings), then tap Retry.',
 
-  placeHint: 'Point your phone toward an open area.',
-  placeButton: 'Place Cannon',
-  placeLocked: 'Cannon locked. Get ready.',
+  placeHint: 'Point your phone toward an open area. Three cannons will lock in.',
+  placeButton: 'Place Cannons',
+  placeLocked: 'Cannons locked. Look left and right!',
   autoPlaceHint: 'Hold steady — placing automatically…',
 
   recenter: 'Recenter',

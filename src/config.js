@@ -67,6 +67,13 @@ export const CONFIG = {
     /** Meters below the initial viewing direction (keep modest so it stays on-screen) */
     heightOffset: 0.65,
     appearDuration: 0.55,
+    /** Count of cannons: left / center / right */
+    count: 3,
+    /**
+     * Lateral spacing (meters) from center to each side cannon.
+     * At ~5.25m depth, ~2.8m ≈ 28° off-center — enough to glance left/right.
+     */
+    sideSpacing: 2.8,
   },
 
   playableCone: {

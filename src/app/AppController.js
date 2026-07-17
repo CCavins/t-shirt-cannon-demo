@@ -179,7 +179,7 @@ export class AppController {
           if (this.game && this.state.is(STATES.PLAYING, STATES.COUNTDOWN)) {
             this.game.update(dt);
           } else if (this.game && this.state.is(STATES.PLACEMENT)) {
-            this.game.cannon.update(dt);
+            this.game.updateCannons(dt);
           }
           if (this.state.is(STATES.PLAYING) || this.state.is(STATES.COUNTDOWN) || this.state.is(STATES.PLACEMENT)) {
             renderer.render(this.mode.getScene(), this.mode.getCamera());
@@ -351,7 +351,7 @@ export class AppController {
         if (this.state.is(STATES.PLAYING) || this.state.is(STATES.COUNTDOWN)) {
           this.game.update(dt);
         } else {
-          this.game.cannon.update(dt);
+          this.game.updateCannons(dt);
         }
       }
 
