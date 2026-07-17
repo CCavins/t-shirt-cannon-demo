@@ -27,11 +27,17 @@ export class GameManager {
     this._outOfViewT = 0;
     this.needsRecenterOffer = false;
     this._finishGrace = 0;
+    this._viewGrace = 0;
+    this.trackingOrientation = false;
   }
 
   placeCannon(worldPos) {
     const lookAt = this.camera.position.clone();
     this.cannon.placeAt(worldPos, lookAt);
+    this._outOfViewT = 0;
+    this.needsRecenterOffer = false;
+    // Don't nag about recenter right after placement
+    this._viewGrace = 5;
   }
 
   recenterCannon(worldPos) {
@@ -39,6 +45,7 @@ export class GameManager {
     this.spawner.pauseBriefly(0.35);
     this._outOfViewT = 0;
     this.needsRecenterOffer = false;
+    this._viewGrace = 5;
   }
 
   startRound() {
@@ -50,6 +57,7 @@ export class GameManager {
     this._finishGrace = 0;
     this._outOfViewT = 0;
     this.needsRecenterOffer = false;
+    this._viewGrace = Math.max(this._viewGrace, 3);
   }
 
   stopSpawning() {
@@ -111,8 +119,15 @@ export class GameManager {
     }
     this.pool.releaseInactive();
 
-    // Out-of-view recenter offer
-    if (this.cannon.group.visible && this.running) {
+    // Out-of-view recenter offer (only when orientation tracking is live)
+    if (this._viewGrace > 0) this._viewGrace -= dt;
+
+    if (
+      this.cannon.group.visible &&
+      this.running &&
+      this.trackingOrientation &&
+      this._viewGrace <= 0
+    ) {
       const visible = this._isCannonVisible();
       if (!visible) {
         this._outOfViewT += dt;
@@ -121,13 +136,19 @@ export class GameManager {
         }
       } else {
         this._outOfViewT = 0;
+        this.needsRecenterOffer = false;
       }
     }
   }
 
   _isCannonVisible() {
-    const v = this.cannon.group.position.clone().project(this.camera);
-    return v.z < 1 && Math.abs(v.x) < 1.15 && Math.abs(v.y) < 1.25;
+    this.camera.updateMatrixWorld(true);
+    this.cannon.group.updateMatrixWorld(true);
+    const world = new THREE.Vector3();
+    this.cannon.group.getWorldPosition(world);
+    const v = world.project(this.camera);
+    // Generous frustum check — cannon sits lower-center by design
+    return v.z > 0 && v.z < 1 && Math.abs(v.x) < 1.4 && Math.abs(v.y) < 1.5;
   }
 
   hitProjectile(projectile, screenX, screenY) {

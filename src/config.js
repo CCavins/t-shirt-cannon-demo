@@ -64,8 +64,8 @@ export const CONFIG = {
   cannon: {
     /** Virtual meters in front of the placement pose */
     distance: 3.0,
-    /** Meters below the initial viewing direction */
-    heightOffset: 1.0,
+    /** Meters below the initial viewing direction (keep modest so it stays on-screen) */
+    heightOffset: 0.65,
     appearDuration: 0.55,
   },
 

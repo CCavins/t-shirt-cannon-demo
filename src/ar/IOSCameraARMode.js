@@ -9,13 +9,13 @@ import { detectDevice } from '../utils/DeviceSupport.js';
  * PRIMARY production AR path for iPhone Safari (and shared camera-overlay).
  */
 export class IOSCameraARMode extends ARMode {
-  constructor({ videoEl, canvasEl, performanceMonitor }) {
+  constructor({ videoEl, canvasEl, performanceMonitor, sensorManager = null }) {
     super();
     this.videoEl = videoEl;
     this.canvasEl = canvasEl;
     this.performanceMonitor = performanceMonitor;
     this.device = detectDevice();
-    this.sensors = new SensorManager();
+    this.sensors = sensorManager || new SensorManager();
     this.stream = null;
     this.scene = null;
     this.camera = null;
@@ -61,6 +61,13 @@ export class IOSCameraARMode extends ARMode {
     return this.sensors;
   }
 
+  isTrackingOrientation() {
+    return (
+      this.permissionResult?.orientation === 'granted' &&
+      !this.orientWorld?.useSimulation
+    );
+  }
+
   async initialize() {
     this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera(
@@ -81,7 +88,6 @@ export class IOSCameraARMode extends ARMode {
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this._resize();
 
-    // Soft ambient + single key — unlit materials do most of the work
     const amb = new THREE.AmbientLight(0xffffff, 0.85);
     const key = new THREE.DirectionalLight(0xfff2cc, 0.55);
     key.position.set(2, 4, 1);
@@ -99,6 +105,9 @@ export class IOSCameraARMode extends ARMode {
     this._ready = true;
   }
 
+  /**
+   * Camera after sensors. Sensors should already be requested from the Start gesture.
+   */
   async requestPermissions() {
     if (!this.device.isSecure) {
       const err = new Error('INSECURE');
@@ -109,6 +118,11 @@ export class IOSCameraARMode extends ARMode {
       const err = new Error('NO_MEDIA');
       err.code = 'NO_MEDIA';
       throw err;
+    }
+
+    // Ensure sensors were requested (fallback if caller forgot)
+    if (this.sensors.orientationPermission === 'unknown') {
+      await this.sensors.requestPermissions();
     }
 
     try {
@@ -132,49 +146,61 @@ export class IOSCameraARMode extends ARMode {
       console.warn('video play', e);
     }
 
-    const sensorPerms = await this.sensors.requestPermissions();
-    this.permissionResult = {
-      camera: true,
-      orientation: sensorPerms.orientation,
-      motion: sensorPerms.motion,
-    };
+    const orientation = this.sensors.orientationPermission;
+    const motion = this.sensors.motionPermission;
 
-    // If orientation denied, still playable via screen-relative / sim-neutral
-    if (sensorPerms.orientation !== 'granted') {
+    if (orientation === 'granted') {
+      this.sensors.startListening();
+      await this.sensors.waitForSample(1000);
+      this.sensors.snapToRaw();
+      this.orientWorld.setSimulation(false);
+      this.orientWorld.enabled = true;
+    } else {
+      // Playable without motion — fixed virtual forward
       this.orientWorld.setSimulation(true);
     }
+
+    this.permissionResult = {
+      camera: true,
+      orientation,
+      motion,
+    };
 
     return this.permissionResult;
   }
 
   placeCannon() {
-    const orient = this.sensors.smooth;
-    if (this.sensors.hasOrientation && this.permissionResult?.orientation === 'granted') {
-      this.orientWorld.captureNeutral(orient);
+    if (this.permissionResult?.orientation === 'granted') {
+      this.sensors.snapToRaw();
+      this.orientWorld.captureNeutral(this.sensors.hasOrientation ? this.sensors.raw : this.sensors.smooth);
       this.orientWorld.useSimulation = false;
     } else {
       this.orientWorld.setSimulation(true);
     }
-    // Reset camera to identity relative pose at placement
+    this.camera.quaternion.identity();
     this.camera.rotation.set(0, 0, 0);
+    this.camera.updateMatrixWorld(true);
     return this.orientWorld.getPlacementPosition();
   }
 
   recenter() {
-    if (this.sensors.hasOrientation && this.permissionResult?.orientation === 'granted') {
-      this.orientWorld.recenter(this.sensors.smooth);
+    if (this.permissionResult?.orientation === 'granted') {
+      this.sensors.snapToRaw();
+      this.orientWorld.recenter(this.sensors.hasOrientation ? this.sensors.raw : this.sensors.smooth);
     } else {
-      this.orientWorld._simYaw = 0;
-      this.orientWorld._simPitch = 0;
+      this.orientWorld.setSimulation(true);
     }
+    this.camera.quaternion.identity();
     this.camera.rotation.set(0, 0, 0);
+    this.camera.updateMatrixWorld(true);
     return this.orientWorld.getPlacementPosition();
   }
 
-  update(dt) {
+  update() {
     if (this._paused || !this._ready) return;
     this.sensors.update();
     this.orientWorld.update(this.sensors.smooth);
+    this.camera.updateMatrixWorld(true);
     this.renderer.render(this.scene, this.camera);
   }
 
@@ -205,7 +231,6 @@ export class IOSCameraARMode extends ARMode {
       return;
     }
     this._paused = false;
-    // Resume camera if tracks ended while backgrounded
     if (this.stream) {
       const live = this.stream.getVideoTracks().some((t) => t.readyState === 'live');
       if (!live) {
@@ -230,6 +255,8 @@ export class IOSCameraARMode extends ARMode {
     window.removeEventListener('resize', this._onResize);
     window.removeEventListener('orientationchange', this._onResize);
     document.removeEventListener('visibilitychange', this._onVis);
+    // Do not dispose shared early SensorManager listeners if we may reuse —
+    // always stop on full dispose of the mode.
     this.sensors.dispose();
     if (this.stream) {
       this.stream.getTracks().forEach((t) => t.stop());

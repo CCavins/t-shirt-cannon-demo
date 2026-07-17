@@ -13,7 +13,9 @@ export const STR = {
   loadingHint: 'Loading arena assets…',
   loadingCameraNote: 'Camera access is requested only after you tap Start.',
 
-  permissionsWorking: 'Starting camera…',
+  permissionsWorking: 'Starting camera & motion sensors…',
+  motionDeniedHint:
+    'Motion access was denied — the game still works, but the cannon won’t move with your phone. Enable Motion & Orientation Access in Settings → Safari → (or site settings), then tap Retry.',
 
   placeHint: 'Point your phone toward an open area.',
   placeButton: 'Place Cannon',

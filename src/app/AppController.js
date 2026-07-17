@@ -4,6 +4,7 @@ import { STR } from '../strings.js';
 import { StateManager, STATES } from './StateManager.js';
 import { UIManager } from '../ui/UIManager.js';
 import { ARManager } from '../ar/ARManager.js';
+import { SensorManager } from '../ar/SensorManager.js';
 import { GameManager } from '../game/GameManager.js';
 import { InputManager } from '../input/InputManager.js';
 import { ParticlePool } from '../effects/ParticlePool.js';
@@ -92,6 +93,12 @@ export class AppController {
     this.state.force(STATES.REQUESTING_PERMISSIONS);
 
     try {
+      // CRITICAL (iOS Safari): DeviceOrientationEvent.requestPermission()
+      // must run in this user-gesture turn BEFORE other awaits (audio/camera),
+      // or the motion prompt never appears and tracking stays disabled.
+      const sensorManager = new SensorManager();
+      await sensorManager.requestPermissions();
+
       await this.audio.unlock();
       // Clean prior session if retrying after an error
       try {
@@ -106,7 +113,7 @@ export class AppController {
       this.game = null;
       this.arManager.dispose();
 
-      this.mode = await this.arManager.startAfterGesture();
+      this.mode = await this.arManager.startAfterGesture({ sensorManager });
 
       // Build game once we have a scene
       const sceneRoot = this.mode.getWorldRoot();
@@ -154,6 +161,12 @@ export class AppController {
         webxr: isXr,
         hasHitTest: isXr && this.mode.getHitTestAvailable?.(),
       });
+
+      // If iOS motion was denied/unavailable, explain that tracking won't follow the phone
+      const orientPerm = this.mode.permissionResult?.orientation;
+      if (orientPerm && orientPerm !== 'granted' && orientPerm !== 'simulated') {
+        this.ui.els.placeHint.textContent = STR.motionDeniedHint;
+      }
 
       if (CONFIG.query.autoPlace && !isXr) {
         this._startAutoPlace();
@@ -225,8 +238,10 @@ export class AppController {
     }
     if (!pos) return;
 
+    this.game.trackingOrientation = !!this.mode.isTrackingOrientation?.();
     this.game.placeCannon(pos);
     this.ui.flashPlaceLocked();
+    this.ui.showRecenterOffer(false);
     this._beginCountdown();
   }
 

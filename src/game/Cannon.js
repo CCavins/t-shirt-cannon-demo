@@ -84,10 +84,10 @@ export class Cannon {
   }
 
   placeAt(worldPos, lookAtTarget) {
+    this._basePosition = worldPos.clone();
     this.group.position.copy(worldPos);
     if (lookAtTarget) {
       this.group.lookAt(lookAtTarget);
-      // lookAt points -Z toward target; barrel already along local -Z
     }
     this.group.visible = true;
     this.group.scale.setScalar(0.01);
@@ -125,8 +125,11 @@ export class Cannon {
       this.muzzleFlash.material.opacity *= 0.7;
     }
 
-    // Subtle idle bob
-    this.group.position.y += Math.sin(performance.now() * 0.003) * 0.0004;
+    // Subtle idle bob around anchored base (do not accumulate drift)
+    if (this._basePosition) {
+      this.group.position.y =
+        this._basePosition.y + Math.sin(performance.now() * 0.003) * 0.025;
+    }
   }
 
   hide() {

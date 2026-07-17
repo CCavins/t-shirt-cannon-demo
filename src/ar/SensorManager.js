@@ -4,6 +4,9 @@ import { detectDevice } from '../utils/DeviceSupport.js';
 /**
  * Device orientation / motion permissions and smoothed euler angles.
  * Does NOT use accelerometer for positional tracking.
+ *
+ * On iOS Safari, requestPermissions() must be invoked directly from a
+ * user-gesture call stack (before other awaits like getUserMedia / audio).
  */
 export class SensorManager {
   constructor() {
@@ -17,10 +20,22 @@ export class SensorManager {
     this._onOrient = this._handleOrientation.bind(this);
     this._onMotion = this._handleMotion.bind(this);
     this.motionSample = null;
+    this._requested = false;
   }
 
+  /**
+   * Call this as the first await inside the Start button handler.
+   */
   async requestPermissions() {
-    // Orientation
+    if (this._requested && this.orientationPermission !== 'unknown') {
+      return {
+        orientation: this.orientationPermission,
+        motion: this.motionPermission,
+      };
+    }
+    this._requested = true;
+
+    // Orientation — must run before other awaits break the iOS gesture chain
     if (this.device.needsOrientationPermission) {
       try {
         this.orientationPermission = await DeviceOrientationEvent.requestPermission();
@@ -29,12 +44,13 @@ export class SensorManager {
         this.orientationPermission = 'denied';
       }
     } else if (this.device.hasDeviceOrientation) {
+      // Android / desktop: listening is enough (no prompt API)
       this.orientationPermission = 'granted';
     } else {
       this.orientationPermission = 'unavailable';
     }
 
-    // Motion (optional)
+    // Motion (optional) — still in the same gesture if we haven't awaited camera yet
     if (this.device.needsMotionPermission) {
       try {
         this.motionPermission = await DeviceMotionEvent.requestPermission();
@@ -84,6 +100,38 @@ export class SensorManager {
 
   _handleMotion(e) {
     this.motionSample = e.accelerationIncludingGravity;
+  }
+
+  /** Copy raw → smooth immediately (use when capturing neutral pose). */
+  snapToRaw() {
+    this.smooth.alpha = this.raw.alpha;
+    this.smooth.beta = this.raw.beta;
+    this.smooth.gamma = this.raw.gamma;
+  }
+
+  /**
+   * Wait briefly for the first deviceorientation sample after permission grant.
+   */
+  waitForSample(timeoutMs = 900) {
+    if (this.hasOrientation) return Promise.resolve(true);
+    if (this.orientationPermission !== 'granted') return Promise.resolve(false);
+
+    return new Promise((resolve) => {
+      const start = performance.now();
+      const tick = () => {
+        if (this.hasOrientation) {
+          this.snapToRaw();
+          resolve(true);
+          return;
+        }
+        if (performance.now() - start >= timeoutMs) {
+          resolve(false);
+          return;
+        }
+        requestAnimationFrame(tick);
+      };
+      tick();
+    });
   }
 
   /**

@@ -18,14 +18,17 @@ export class ARManager {
 
   /**
    * Pick and initialize the AR mode. iPhone always uses camera overlay.
-   * Android may try WebXR unless forceFallback / debug.
+   * @param {{ sensorManager?: import('./SensorManager.js').SensorManager }} [opts]
+   *        sensorManager should already have requestPermissions() completed
+   *        from the Start button gesture (required on iOS).
    */
-  async startAfterGesture() {
+  async startAfterGesture({ sensorManager } = {}) {
     if (CONFIG.query.debug) {
       this.mode = new DesktopDebugMode({
         videoEl: this.videoEl,
         canvasEl: this.canvasEl,
         performanceMonitor: this.performanceMonitor,
+        sensorManager,
       });
       await this.mode.initialize();
       await this.mode.requestPermissions();
@@ -60,18 +63,13 @@ export class ARManager {
       }
     }
 
-    // Primary path: iOS camera AR / Android camera fallback (same stack)
-    this.mode = this.device.isIOS
-      ? new IOSCameraARMode({
-          videoEl: this.videoEl,
-          canvasEl: this.canvasEl,
-          performanceMonitor: this.performanceMonitor,
-        })
-      : new CameraFallbackMode({
-          videoEl: this.videoEl,
-          canvasEl: this.canvasEl,
-          performanceMonitor: this.performanceMonitor,
-        });
+    const ModeClass = this.device.isIOS ? IOSCameraARMode : CameraFallbackMode;
+    this.mode = new ModeClass({
+      videoEl: this.videoEl,
+      canvasEl: this.canvasEl,
+      performanceMonitor: this.performanceMonitor,
+      sensorManager,
+    });
 
     await this.mode.initialize();
     await this.mode.requestPermissions();
