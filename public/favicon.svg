@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="SHIRT BLAST AR">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1a3470"/>
+      <stop offset="100%" stop-color="#0a1630"/>
+    </linearGradient>
+    <linearGradient id="barrel" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#2bb8d6"/>
+      <stop offset="100%" stop-color="#3de7ff"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="url(#bg)"/>
+  <!-- chassis -->
+  <rect x="14" y="36" width="28" height="12" rx="3" fill="#122548"/>
+  <circle cx="20" cy="50" r="5" fill="#ff6b4a"/>
+  <circle cx="36" cy="50" r="5" fill="#ff6b4a"/>
+  <!-- barrel -->
+  <rect x="30" y="24" width="26" height="10" rx="4" fill="url(#barrel)" transform="rotate(-18 30 29)"/>
+  <circle cx="52" cy="20" r="5" fill="#ffe566"/>
+  <!-- shirt burst -->
+  <ellipse cx="56" cy="14" rx="5" ry="3.5" fill="#ff6b4a" transform="rotate(25 56 14)"/>
+</svg>
