@@ -49,9 +49,6 @@ export class UIManager {
         <div class="hud">
           <div class="hud-chip"><span class="label">${STR.hudScore}</span><span class="value" id="place-score">0</span></div>
         </div>
-        <div class="floating-controls">
-          <button type="button" id="btn-recenter-place" class="interactive">${STR.recenter}</button>
-        </div>
         <div class="placement-footer panel">
           <p class="tagline" id="place-hint" style="margin:0 0 0.8rem">${STR.placeHint}</p>
           <button type="button" class="btn interactive" id="btn-place">${STR.placeButton}</button>
@@ -68,14 +65,10 @@ export class UIManager {
           <div class="hud-chip combo"><span class="label">${STR.hudCombo}</span><span class="value" id="hud-combo">0</span></div>
           <div class="hud-chip"><span class="label">${STR.hudTime}</span><span class="value" id="hud-time">30</span></div>
         </div>
-        <div class="floating-controls">
-          <button type="button" id="btn-recenter-play" class="interactive">${STR.recenter}</button>
-        </div>
-        <div id="recenter-toast" class="toast hidden">
-          <span>${STR.recenterOffer}</span>
-          <button type="button" class="btn-secondary btn interactive" id="btn-recenter-offer" style="width:auto;margin:0">${STR.yesRecenter}</button>
-          <button type="button" class="btn-ghost interactive" id="btn-dismiss-recenter" style="width:auto;margin:0">${STR.dismiss}</button>
-        </div>
+      </div>
+
+      <div id="recenter-controls" class="floating-controls hidden">
+        <button type="button" id="btn-recenter" class="interactive">${STR.recenter}</button>
       </div>
 
       <div id="screen-results" class="screen hidden">
@@ -123,7 +116,7 @@ export class UIManager {
       hudTime: this.root.querySelector('#hud-time'),
       placeHint: this.root.querySelector('#place-hint'),
       placeGuide: this.root.querySelector('#placement-guide'),
-      recenterToast: this.root.querySelector('#recenter-toast'),
+      recenterControls: this.root.querySelector('#recenter-controls'),
       landscape: this.root.querySelector('#landscape-banner'),
       errorMsg: this.root.querySelector('#error-msg'),
       soundBtn: this.root.querySelector('#btn-sound'),
@@ -139,16 +132,7 @@ export class UIManager {
       url.searchParams.set('debug', 'true');
       window.location.href = url.toString();
     });
-    this.root.querySelector('#btn-recenter-place').addEventListener('click', () => this._emit('recenter'));
-    this.root.querySelector('#btn-recenter-play').addEventListener('click', () => this._emit('recenter'));
-    this.root.querySelector('#btn-recenter-offer').addEventListener('click', () => {
-      this.showRecenterOffer(false);
-      this._emit('recenter');
-    });
-    this.root.querySelector('#btn-dismiss-recenter').addEventListener('click', () => {
-      this.showRecenterOffer(false);
-      this._emit('dismissRecenter');
-    });
+    this.root.querySelector('#btn-recenter').addEventListener('click', () => this._emit('recenter'));
     this.els.soundBtn.addEventListener('click', () => this._emit('toggleSound'));
   }
 
@@ -179,6 +163,14 @@ export class UIManager {
     }
     const id = map[state];
     if (id && this.els[id]) this.els[id].classList.remove('hidden');
+
+    // Persistent Recenter control during AR session (no popup prompts)
+    const showRecenter = [
+      STATES.PLACEMENT,
+      STATES.COUNTDOWN,
+      STATES.PLAYING,
+    ].includes(state);
+    this.els.recenterControls?.classList.toggle('hidden', !showRecenter);
   }
 
   setPlacementMode({ autoPlace = false, webxr = false, hasHitTest = false } = {}) {
@@ -218,10 +210,6 @@ export class UIManager {
 
   showError(message) {
     this.els.errorMsg.textContent = message || STR.errorGeneric;
-  }
-
-  showRecenterOffer(show) {
-    this.els.recenterToast.classList.toggle('hidden', !show);
   }
 
   setLandscape(show) {

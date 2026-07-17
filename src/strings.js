@@ -23,9 +23,6 @@ export const STR = {
   autoPlaceHint: 'Hold steady — placing automatically…',
 
   recenter: 'Recenter',
-  recenterOffer: 'Cannon out of view. Recenter?',
-  yesRecenter: 'Recenter now',
-  dismiss: 'Keep playing',
 
   countdownGo: 'GO!',
 

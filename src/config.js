@@ -105,8 +105,6 @@ export const CONFIG = {
   orientation: {
     /** Higher = snappier; lower = smoother (0–1 style lerp per ~16ms) */
     damping: 0.18,
-    /** How long the cannon must stay off-screen before offering recenter */
-    outOfViewSecondsBeforeOffer: 4.5,
   },
 
   placement: {

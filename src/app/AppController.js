@@ -43,7 +43,6 @@ export class AppController {
     this._raf = 0;
     this._countdownTimer = null;
     this._autoPlaceTimer = null;
-    this._suppressRecenterOffer = false;
     this._roundEnded = false;
 
     this._bindUi();
@@ -78,10 +77,6 @@ export class AppController {
       this.state.force(STATES.INTRO);
     });
     this.ui.on('recenter', () => this._onRecenter());
-    this.ui.on('dismissRecenter', () => {
-      this._suppressRecenterOffer = true;
-      this.ui.showRecenterOffer(false);
-    });
     this.ui.on('toggleSound', () => {
       this.audio.setEnabled(!this.audio.enabled);
       this.ui.setSoundEnabled(this.audio.enabled);
@@ -238,10 +233,8 @@ export class AppController {
     }
     if (!pos) return;
 
-    this.game.trackingOrientation = !!this.mode.isTrackingOrientation?.();
     this.game.placeCannon(pos);
     this.ui.flashPlaceLocked();
-    this.ui.showRecenterOffer(false);
     this._beginCountdown();
   }
 
@@ -272,7 +265,6 @@ export class AppController {
   _startPlaying() {
     if (!this.state.is(STATES.COUNTDOWN)) return;
     this._roundEnded = false;
-    this._suppressRecenterOffer = false;
     this.game.startRound();
     this.state.set(STATES.PLAYING);
     this.ui.updateHud({ score: 0, combo: 0, remaining: CONFIG.game.duration });
@@ -336,8 +328,6 @@ export class AppController {
       this.ui.setPlacementMode({ webxr: true, hasHitTest: this.mode.getHitTestAvailable?.() });
       return;
     }
-    this.ui.showRecenterOffer(false);
-    this._suppressRecenterOffer = false;
   }
 
   _watchLandscape() {
@@ -379,14 +369,6 @@ export class AppController {
       }
 
       this.particles?.update(dt);
-    }
-
-    if (this.game && this.state.is(STATES.PLAYING)) {
-      const showOffer =
-        this.game.needsRecenterOffer && !this._suppressRecenterOffer;
-      this.ui.showRecenterOffer(showOffer);
-    } else if (!this.state.is(STATES.PLAYING)) {
-      this.ui.showRecenterOffer(false);
     }
 
     this._updateDebug();
