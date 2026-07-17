@@ -72,7 +72,6 @@ export class AppController {
     this.ui.on('start', () => this._onStart());
     this.ui.on('place', () => this._onPlace());
     this.ui.on('playAgain', () => this._onPlayAgain());
-    this.ui.on('reposition', () => this._onReposition());
     this.ui.on('retry', () => {
       this.state.force(STATES.INTRO);
     });
@@ -303,18 +302,6 @@ export class AppController {
     this._roundEnded = false;
     this.state.force(STATES.COUNTDOWN);
     this._beginCountdown();
-  }
-
-  _onReposition() {
-    if (!this.state.is(STATES.RESULTS, STATES.PLAYING, STATES.PLACEMENT)) return;
-    this.game?.pool.clearAll();
-    this.game.running = false;
-    this.state.force(STATES.PLACEMENT);
-    this.ui.setPlacementMode({
-      autoPlace: false,
-      webxr: this.mode?.getName() === 'AndroidWebXRMode',
-      hasHitTest: this.mode?.getHitTestAvailable?.(),
-    });
   }
 
   _onRecenter() {

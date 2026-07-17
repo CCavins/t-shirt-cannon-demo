@@ -86,7 +86,6 @@ export class UIManager {
             <div><span>${STR.resultsHigh}</span><strong id="results-high">0</strong></div>
           </div>
           <button type="button" class="btn interactive" id="btn-again">${STR.playAgain}</button>
-          <button type="button" class="btn-secondary btn interactive" id="btn-reposition">${STR.reposition}</button>
         </div>
       </div>
 
@@ -125,7 +124,6 @@ export class UIManager {
     this.root.querySelector('#btn-start').addEventListener('click', () => this._emit('start'));
     this.root.querySelector('#btn-place').addEventListener('click', () => this._emit('place'));
     this.root.querySelector('#btn-again').addEventListener('click', () => this._emit('playAgain'));
-    this.root.querySelector('#btn-reposition').addEventListener('click', () => this._emit('reposition'));
     this.root.querySelector('#btn-retry').addEventListener('click', () => this._emit('retry'));
     this.root.querySelector('#btn-debug-link').addEventListener('click', () => {
       const url = new URL(window.location.href);

@@ -37,7 +37,6 @@ export const STR = {
   resultsCombo: 'Best combo',
   resultsHigh: 'High score',
   playAgain: 'Play Again',
-  reposition: 'Reposition Cannon',
 
   performance: {
     low: 'Warm-up round — try again!',
