@@ -1,5 +1,4 @@
 import { STR } from '../strings.js';
-import { CONFIG } from '../config.js';
 import { STATES } from '../app/StateManager.js';
 
 export class UIManager {
@@ -90,7 +89,7 @@ export class UIManager {
       </div>
 
       <div id="screen-error" class="screen hidden">
-        <h1 class="brand" style="font-size:clamp(2.2rem,9vw,3.5rem)">Oops</h1>
+        <h1 class="brand" style="font-size:clamp(2.2rem,9vw,3.5rem)">${STR.errorTitle}</h1>
         <p class="panel tagline" id="error-msg">${STR.errorGeneric}</p>
         <button type="button" class="btn interactive" id="btn-retry">${STR.retry}</button>
         <button type="button" class="btn-ghost interactive" id="btn-debug-link">${STR.useDebug}</button>

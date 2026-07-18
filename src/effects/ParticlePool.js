@@ -73,4 +73,14 @@ export class ParticlePool {
       p.mesh.rotation.z += dt * 6;
     }
   }
+
+  dispose() {
+    for (const p of this.particles) {
+      this.scene?.remove(p.mesh);
+      p.mesh.material?.dispose?.();
+    }
+    this.geo?.dispose?.();
+    this.particles = [];
+    this.scene = null;
+  }
 }

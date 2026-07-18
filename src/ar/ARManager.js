@@ -1,5 +1,6 @@
 import { CONFIG } from '../config.js';
 import { detectDevice, isImmersiveArSupported } from '../utils/DeviceSupport.js';
+import { devWarn } from '../utils/log.js';
 import { IOSCameraARMode } from './IOSCameraARMode.js';
 import { CameraFallbackMode } from './CameraFallbackMode.js';
 import { DesktopDebugMode } from './DesktopDebugMode.js';
@@ -53,7 +54,7 @@ export class ARManager {
         this.modeName = this.mode.getName();
         return this.mode;
       } catch (e) {
-        console.warn('WebXR failed, using camera overlay', e);
+        devWarn('WebXR failed, using camera overlay', e);
         try {
           this.mode?.dispose?.();
         } catch {

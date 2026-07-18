@@ -20,8 +20,6 @@ export class GameManager {
       c.group.name = `cannon-${['left', 'center', 'right'][i]}`;
       c.attach(sceneRoot);
     });
-    /** @deprecated use cannons[1] — kept for any leftover callers */
-    this.cannon = this.cannons[1];
 
     this.pool = new ProjectilePool(14);
     this.spawner = new SpawnManager();

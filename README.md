@@ -1,147 +1,83 @@
 # SHIRT BLAST AR
 
-iPhone-first mobile AR activation demo: a virtual T-shirt cannon launches shirts through your camera view — tap them before time runs out.
+**[Play the demo →](https://ccavins.github.io/t-shirt-cannon-demo/)**
 
-**Primary platform:** iPhone Safari (camera + device orientation pseudo-AR)  
-**Secondary:** Android Chrome camera overlay, with optional WebXR when available  
-**Deploy:** Static site on GitHub Pages (no backend)
+Tap flying T-shirts from three arena cannons before time runs out. Built as an iPhone Safari camera AR experience — no App Store install, no backend.
+
+Best on **iPhone Safari** over HTTPS. On a computer, use [`?debug=true`](https://ccavins.github.io/t-shirt-cannon-demo/?debug=true) (drag to look around).
+
+## How to play
+
+1. Open the link on your phone  
+2. Tap **Start** and allow camera (and motion, if asked)  
+3. Point at an open area and **Place Cannons**  
+4. Tap shirts for 30 seconds — use **Recenter** anytime  
 
 ## Features
 
-- Rear-camera full-screen AR with transparent Three.js overlay
-- Virtual cannon placement (no plane tracking required)
-- Recenter during placement and gameplay
-- 30-second round, combos, local high score
-- Forgiving layered touch targeting
-- Desktop debug mode (`?debug=true`)
-- Optional Android WebXR enhancement
-- Procedural placeholder 3D/UI/audio (easy asset swap)
+- Rear-camera AR with a transparent Three.js overlay  
+- Three cannons (left / center / right) sharing one launch rate  
+- Virtual placement — no plane tracking required  
+- Combos, local high score, forgiving touch targets  
+- Desktop debug mode and optional Android WebXR  
 
 ## Technical approach
 
-This project does **not** require WebXR or plane detection for the core experience.
+Browser AR varies by platform. This demo’s **primary** path is camera + device orientation (iPhone Safari). WebXR is an optional Android enhancement only.
 
-| Mode | When | How |
-|------|------|-----|
-| `IOSCameraARMode` | iPhone / primary | `getUserMedia` + orientation world |
-| `CameraFallbackMode` | Android without WebXR | Same camera overlay stack |
-| `DesktopDebugMode` | `?debug=true` | Simulated background + pointer-drag look |
-| `AndroidWebXRMode` | Compatible Android only | Optional `immersive-ar` + hit-test |
-
-Browser AR capabilities vary. The camera-based path is intentional so the game works from a normal HTTPS page in Safari with no App Store install, custom browser, or paid WebAR SDK.
-
-## Browser compatibility
-
-- **iPhone Safari (target):** camera overlay + orientation (playable if motion denied)
-- **Android Chrome:** camera overlay; WebXR AR when the device/browser supports it
-- **Desktop:** use `?debug=true` (no camera required)
-
-Camera access needs **HTTPS** or **localhost**. GitHub Pages provides HTTPS.
+| Mode | When |
+|------|------|
+| Camera + orientation | iPhone / default Android |
+| Desktop debug | `?debug=true` |
+| WebXR immersive-AR | Compatible Android Chrome |
 
 ## Permissions
 
-All permissions start from one **Start Camera Game** tap:
+All prompts start from one **Start** tap: rear camera, then motion/orientation when the browser requires it. The game stays playable if motion is denied.
 
-1. Rear camera (`facingMode: environment`)
-2. `DeviceOrientationEvent.requestPermission` when present (iOS)
-3. `DeviceMotionEvent.requestPermission` when present (optional)
-4. Audio unlock
-
-Sensors are never required to play. If orientation is denied, the game uses a screen-relative / simulated look.
-
-## Local setup
+## Local development
 
 ```bash
 npm install
 npm run dev
 ```
 
-Open the printed local URL on your phone (same Wi‑Fi), or use a tunnel. For camera on a physical iPhone, prefer HTTPS (e.g. ngrok) or deploy to Pages.
-
 ```bash
 npm run build
 npm run preview
 ```
 
-## GitHub Pages deployment
+Camera needs **HTTPS** or **localhost**. For a physical iPhone against your laptop, use a tunnel or the GitHub Pages URL.
 
-1. Push this repo to GitHub.
-2. **Settings → Pages → Build and deployment → Source: GitHub Actions**.
-3. The workflow [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) builds with  
-   `GITHUB_PAGES_BASE=/<repo-name>/` and deploys `dist`.
-4. For a **user/org site** (`username.github.io`), set `GITHUB_PAGES_BASE=/` in the workflow env.
+## GitHub Pages
 
-No environment secrets are required.
+1. **Settings → Pages → Source: GitHub Actions**  
+2. Push to `main` — [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) builds and deploys `dist`  
+3. Live site: https://ccavins.github.io/t-shirt-cannon-demo/  
 
 ## Debug query parameters
 
 | Param | Effect |
 |-------|--------|
-| `?debug=true` | No camera; drag to look; diagnostic panel |
+| `?debug=true` | No camera; drag to look; diagnostics |
 | `?duration=10` | Shorter round |
-| `?showBounds=true` | Show shirt hit spheres |
+| `?showBounds=true` | Show hit spheres |
 | `?forceFallback=true` | Skip WebXR on Android |
-| `?autoPlace=true` | Auto-place after short countdown |
+| `?autoPlace=true` | Auto-place after a short countdown |
 | `?performanceMode=low` | `auto` \| `high` \| `balanced` \| `low` |
 
-## Configuration
+## Configuration & assets
 
-Tune gameplay in [`src/config.js`](src/config.js):
+Tune gameplay in [`src/config.js`](src/config.js) (distance, spacing, spawn rate, scoring).
 
-- Round duration, spawn rate, max active shirts
-- Cannon distance / height
-- Launch zone weights and playable cone
-- Hit collider scale and screen tolerance
-- Orientation damping, scoring, pixel-ratio cap
-
-## Asset replacement
-
-Procedural meshes live in `Cannon.js` / `ShirtProjectile.js`. To replace:
-
-1. Drop GLB/PNG/WebP into `public/assets/...`
-2. Load with Three.js `GLTFLoader` / `TextureLoader`
-3. Keep hit colliders ~1.3–1.6× visible size
-
-### Higgsfield workflow
-
-See [`asset-prompts/`](asset-prompts/) for generation prompts (cannon, shirt, UI). Convert outputs to:
-
-- Transparent PNG sprites (key green/magenta)
-- Compressed WebP textures
-- Optimized GLB models (mobile-friendly)
-
-Higgsfield is **not** an app dependency.
-
-## Device testing checklist
-
-- [ ] Current iPhone Safari
-- [ ] Older / low-performance (`?performanceMode=low`)
-- [ ] Motion permission granted
-- [ ] Motion permission denied
-- [ ] Camera permission denied → Retry copy
-- [ ] Switch apps and return (camera resumes)
-- [ ] Portrait ↔ landscape banner
-- [ ] Low Power Mode (where practical)
-- [ ] Android Chrome camera overlay
-- [ ] Android Chrome WebXR (if supported)
-- [ ] Desktop `?debug=true`
-- [ ] GitHub Pages production HTTPS URL
+Procedural meshes ship by default. Replacement prompts live in [`asset-prompts/`](asset-prompts/). Drop GLB/PNG into `public/assets/` when you have final art.
 
 ## Known limitations
 
-- No true 6DOF positional tracking in Safari camera mode (rotation only)
-- WebXR plane/hit-test is Android-enhancement only
-- Procedural art is a polished placeholder, not final brand kit
-- Orientation quality varies by device and permissions
-
-## Future production recommendations
-
-- Replace procedural props with optimized GLBs
-- Add analytics / consent as required for your event
-- Harden iOS permission recovery UX per OS version
-- Consider a short onboarding clip before first placement
-- Cap concurrent sessions only if you add a backend later (not required here)
+- Safari camera mode is rotational AR (no true 6DOF walk-around)  
+- Orientation quality depends on device permissions and sensors  
+- Procedural art is placeholder-ready for brand swaps  
 
 ## License
 
-Demo code is provided for the activation POC. Do not include real team/league brand assets.
+MIT — see [LICENSE](LICENSE). Do not include real team/league brand assets.

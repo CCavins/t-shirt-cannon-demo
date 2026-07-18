@@ -33,7 +33,6 @@ export const CONFIG = {
   game: {
     /** Round length in seconds */
     duration: query.duration ?? 30,
-    title: 'SHIRT BLAST AR',
   },
 
   scoring: {
@@ -112,8 +111,6 @@ export const CONFIG = {
   orientation: {
     /** Higher = snappier; lower = smoother (0–1 style lerp per ~16ms) */
     damping: 0.18,
-    /** Roll is always locked in OrientationWorld to prevent horizon bank */
-    lockRoll: true,
   },
 
   placement: {
@@ -151,5 +148,3 @@ export const CONFIG = {
     showBounds: query.showBounds,
   },
 };
-
-export default CONFIG;

@@ -13,6 +13,7 @@ import { HapticsManager } from '../effects/HapticsManager.js';
 import { PerformanceMonitor } from '../utils/PerformanceMonitor.js';
 import { DebugTools } from '../utils/DebugTools.js';
 import { detectDevice, isLandscape } from '../utils/DeviceSupport.js';
+import { devError } from '../utils/log.js';
 
 export class AppController {
   constructor() {
@@ -57,10 +58,9 @@ export class AppController {
     const durPill = this.uiRoot.querySelector('#duration-pill');
     if (durPill) durPill.textContent = `${CONFIG.game.duration} seconds`;
 
-    // Fake/light asset load progress — procedural assets need no network
     for (let i = 0; i <= 10; i++) {
       this.ui.setLoadProgress(i / 10);
-      await wait(40);
+      await wait(35);
     }
 
     this.state.set(STATES.INTRO);
@@ -105,16 +105,21 @@ export class AppController {
       this.input = null;
       this.game?.dispose?.();
       this.game = null;
+      this.particles?.dispose?.();
+      this.particles = null;
       this.arManager.dispose();
 
       this.mode = await this.arManager.startAfterGesture({ sensorManager });
 
-      // Build game once we have a scene
+      // If WebXR won, the early sensor manager is unused — stop its listeners
+      if (this.mode.getName() === 'AndroidWebXRMode') {
+        sensorManager.dispose();
+      }
+
       const sceneRoot = this.mode.getWorldRoot();
       const camera = this.mode.getCamera();
       const scene = this.mode.getScene();
 
-      this.game?.dispose?.();
       this.game = new GameManager({
         sceneRoot,
         camera,
@@ -131,10 +136,6 @@ export class AppController {
       });
       this.game.onLaunch = () => this.audio.playLaunch();
 
-      this.particles?.geo; // keep ref
-      if (this.particles) {
-        // recreate attached to new scene
-      }
       this.particles = new ParticlePool(scene, 64);
       this.particles.setScale(this.perf.effectsScale);
 
@@ -190,7 +191,7 @@ export class AppController {
         this._xrLoopBound = true;
       }
     } catch (e) {
-      console.error(e);
+      devError(e);
       this._showStartError(e);
     }
   }
@@ -203,7 +204,7 @@ export class AppController {
     if (CONFIG.debug.enabled && e) {
       const detail = e.message || e.code || String(e);
       msg = `${msg}\n\n(${detail})`;
-      console.error('[SHIRT BLAST AR] start error', e);
+      devError('[SHIRT BLAST AR] start error', e);
     }
     this.ui.showError(msg);
     this.state.force(STATES.ERROR, e);
@@ -336,11 +337,6 @@ export class AppController {
     this.perf.tick(now);
     if (this.particles) this.particles.setScale(this.perf.effectsScale);
 
-    // Resize pixel ratio from perf
-    if (this.mode?.renderer && this.mode._resize) {
-      // IOS path has _resize; call lightly when scale changes
-    }
-
     // When WebXR owns the animation loop, skip duplicate simulation here
     if (!this._xrLoopBound) {
       if (this.mode) {
@@ -400,6 +396,8 @@ export class AppController {
     this._xrLoopBound = false;
     this.input?.dispose();
     this.game?.dispose();
+    this.particles?.dispose?.();
+    this.particles = null;
     this.arManager.dispose();
   }
 }

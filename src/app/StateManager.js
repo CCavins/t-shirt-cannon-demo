@@ -1,3 +1,5 @@
+import { devWarn } from '../utils/log.js';
+
 export const STATES = {
   LOADING: 'LOADING',
   INTRO: 'INTRO',
@@ -44,7 +46,7 @@ export class StateManager {
     if (this.state === next) return false;
     const allowed = ALLOWED[this.state] || [];
     if (!allowed.includes(next)) {
-      console.warn(`[StateManager] blocked ${this.state} → ${next}`);
+      devWarn(`[StateManager] blocked ${this.state} → ${next}`);
       return false;
     }
     const prev = this.state;

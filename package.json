@@ -4,6 +4,20 @@
   "private": true,
   "type": "module",
   "description": "SHIRT BLAST AR — iPhone-first camera pseudo-AR T-shirt cannon game",
+  "homepage": "https://ccavins.github.io/t-shirt-cannon-demo/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/CCavins/t-shirt-cannon-demo.git"
+  },
+  "license": "MIT",
+  "keywords": [
+    "webxr",
+    "ar",
+    "threejs",
+    "iphone",
+    "safari",
+    "game"
+  ],
   "scripts": {
     "dev": "vite",
     "build": "vite build",

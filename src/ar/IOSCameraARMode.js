@@ -4,6 +4,7 @@ import { SensorManager } from './SensorManager.js';
 import { OrientationWorld } from './OrientationWorld.js';
 import { CONFIG } from '../config.js';
 import { detectDevice } from '../utils/DeviceSupport.js';
+import { devWarn } from '../utils/log.js';
 
 /**
  * PRIMARY production AR path for iPhone Safari (and shared camera-overlay).
@@ -143,7 +144,7 @@ export class IOSCameraARMode extends ARMode {
     try {
       await this.videoEl.play();
     } catch (e) {
-      console.warn('video play', e);
+      devWarn('video play', e);
     }
 
     const orientation = this.sensors.orientationPermission;
@@ -239,7 +240,7 @@ export class IOSCameraARMode extends ARMode {
           this.stream = await navigator.mediaDevices.getUserMedia(CONFIG.camera.constraints);
           this.videoEl.srcObject = this.stream;
         } catch (e) {
-          console.warn('camera resume failed', e);
+          devWarn('camera resume failed', e);
         }
       }
     }

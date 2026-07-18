@@ -1,23 +1,23 @@
-/** All player-visible copy — keep UI free of hard-coded literals where practical. */
+/** All player-visible copy. */
 
 export const STR = {
   title: 'SHIRT BLAST AR',
   tagline: 'Tap the flying shirts before time runs out.',
   durationLabel: '30 seconds',
-  startButton: 'Start Camera Game',
-  cameraNote: 'Your camera is used for the AR experience. Nothing is recorded or uploaded.',
+  startButton: 'Start',
+  cameraNote: 'Uses your camera for AR. Nothing is recorded or uploaded.',
   soundOn: 'Sound on',
   soundOff: 'Sound off',
 
   loadingTitle: 'SHIRT BLAST AR',
-  loadingHint: 'Loading arena assets…',
+  loadingHint: 'Getting ready…',
   loadingCameraNote: 'Camera access is requested only after you tap Start.',
 
-  permissionsWorking: 'Starting camera & motion sensors…',
+  permissionsWorking: 'Starting camera…',
   motionDeniedHint:
-    'Motion access was denied — the game still works, but the cannon won’t move with your phone. Enable Motion & Orientation Access in Settings → Safari → (or site settings), then tap Retry.',
+    'Motion access is off — the game still works, but cannons won’t follow your phone. You can enable it in Safari settings and tap Retry.',
 
-  placeHint: 'Point your phone toward an open area. Three cannons will lock in.',
+  placeHint: 'Point your phone at an open area. Three cannons will lock in.',
   placeButton: 'Place Cannons',
   placeLocked: 'Cannons locked. Look left and right!',
   autoPlaceHint: 'Hold steady — placing automatically…',
@@ -45,20 +45,19 @@ export const STR = {
     elite: 'Shirt blast legend!',
   },
 
+  errorTitle: 'Oops',
   errorCameraDenied:
-    'Camera access is needed to play. In Safari: Settings → Safari → Camera, or tap the aA / site settings icon and allow Camera, then tap Retry.',
+    'Camera access is needed to play. In Safari: allow Camera for this site, then tap Retry.',
   errorCameraUnavailable:
-    'No rear camera is available on this device. Try another phone, or open with ?debug=true for a desktop test mode.',
+    'No rear camera available. Try another phone, or open with ?debug=true on a computer.',
   errorInsecure:
-    'Camera access requires HTTPS (or localhost). Open this page from GitHub Pages or a secure local tunnel.',
+    'Camera access needs HTTPS (or localhost). Open this page from GitHub Pages or a secure tunnel.',
   errorGeneric: 'Something went wrong starting the experience. Please try again.',
   retry: 'Retry',
-  useDebug: 'Open debug mode',
+  useDebug: 'Try desktop debug mode',
 
   landscapeHint: 'Portrait works best — rotate your phone for the full arena view.',
 
-  webxrPlane: 'Floor detected — tap to place the cannon.',
-  webxrScan: 'Move your phone to find the floor.',
+  webxrPlane: 'Surface found — tap to place the cannons.',
+  webxrScan: 'Move your phone to find a surface.',
 };
-
-export default STR;

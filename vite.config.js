@@ -7,7 +7,8 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
-    sourcemap: true,
+    // Keep production deploys lean / not source-readable via .map files
+    sourcemap: false,
   },
   server: {
     host: true,

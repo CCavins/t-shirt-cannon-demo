@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { ARMode } from './ARMode.js';
-import { OrientationWorld } from './OrientationWorld.js';
 import { CONFIG } from '../config.js';
+import { devWarn } from '../utils/log.js';
 
 /**
  * Optional Android enhancement. Never required to play.
@@ -83,7 +83,6 @@ export class AndroidWebXRMode extends ARMode {
 
     this.worldRoot = new THREE.Group();
     this.scene.add(this.worldRoot);
-    this.orientWorld = new OrientationWorld(this.camera);
 
     this.reticle = new THREE.Mesh(
       new THREE.RingGeometry(0.12, 0.16, 32).rotateX(-Math.PI / 2),
@@ -147,7 +146,7 @@ export class AndroidWebXRMode extends ARMode {
         this.hitTestSource = await this.session.requestHitTestSource({ space: viewerSpace });
       }
     } catch (e) {
-      console.warn('hit-test unavailable', e);
+      devWarn('hit-test unavailable', e);
       this.hitTestSource = null;
     }
 

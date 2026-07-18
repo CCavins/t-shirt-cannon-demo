@@ -1,5 +1,6 @@
 import { CONFIG } from '../config.js';
 import { detectDevice } from '../utils/DeviceSupport.js';
+import { devWarn } from '../utils/log.js';
 
 /**
  * Device orientation / motion permissions and smoothed euler angles.
@@ -19,7 +20,6 @@ export class SensorManager {
     this._listening = false;
     this._onOrient = this._handleOrientation.bind(this);
     this._onMotion = this._handleMotion.bind(this);
-    this.motionSample = null;
     this._requested = false;
   }
 
@@ -40,7 +40,7 @@ export class SensorManager {
       try {
         this.orientationPermission = await DeviceOrientationEvent.requestPermission();
       } catch (e) {
-        console.warn('Orientation permission error', e);
+        devWarn('Orientation permission error', e);
         this.orientationPermission = 'denied';
       }
     } else if (this.device.hasDeviceOrientation) {
@@ -55,7 +55,7 @@ export class SensorManager {
       try {
         this.motionPermission = await DeviceMotionEvent.requestPermission();
       } catch (e) {
-        console.warn('Motion permission error', e);
+        devWarn('Motion permission error', e);
         this.motionPermission = 'denied';
       }
     } else if (this.device.hasDeviceMotion) {
@@ -98,8 +98,8 @@ export class SensorManager {
     this.raw.gamma = e.gamma ?? 0;
   }
 
-  _handleMotion(e) {
-    this.motionSample = e.accelerationIncludingGravity;
+  _handleMotion() {
+    // Motion is optional; listening keeps iOS permission satisfied when granted.
   }
 
   /** Copy raw → smooth immediately (use when capturing neutral pose). */
